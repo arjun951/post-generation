@@ -37,18 +37,12 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Construct the prompt for image generation
-    let prompt = `CRITICAL: Generate an image that EXACTLY matches the dimensions and aspect ratio of the provided dealership template. The template contains the dealership logo, address, and contact information that MUST remain visible and unchanged.
+    // Construct the prompt for image editing - we'll overlay promotional content on the template
+    let prompt = `Add professional automotive promotional content to this dealership template image. The template MUST remain completely intact and unchanged - preserve all existing logos, branding, text, and layout elements exactly as they are.
 
-Create a professional automotive dealership promotional post with the following requirements:
+Add the following promotional content as an overlay to the existing template:
 
-1. EXACT SIZE MATCHING: The generated image MUST be the exact same width and height as the template image provided. Analyze the template dimensions and match them precisely.
-
-2. FULL COVERAGE: Cover the ENTIRE template area with the generated content. There should be NO whitespace, NO margins, and NO empty areas. The composition must extend edge-to-edge.
-
-3. TEMPLATE PRESERVATION: Keep the dealership logo, branding, address, and phone number from the template clearly visible and legible. Position promotional content around these elements.
-
-4. VEHICLE CONTENT: Feature ${numberOfVehicles} vehicle(s): ${vehicleNames.join(', ')}.
+1. VEHICLE CONTENT: Feature ${numberOfVehicles} vehicle(s): ${vehicleNames.join(', ')}.
    Background setting: ${backgroundTheme}.`;
     
     if (specialFeature) {
@@ -63,29 +57,30 @@ Create a professional automotive dealership promotional post with the following 
       prompt += `\n   Use the provided vehicle photos in the composition.`;
     }
     
-    prompt += `\n\n5. QUALITY: High-quality, professional automotive photography with dramatic lighting and premium composition suitable for social media marketing.
+    prompt += `\n\n2. CRITICAL RULES:
+   - DO NOT modify, remove, or change any existing template elements
+   - The template logo, address, phone, and branding MUST stay exactly as provided
+   - Add promotional vehicle content that complements the existing template design
+   - Ensure the final composition is professional and suitable for social media marketing
+   - Match the visual style and quality of the template
 
-REMEMBER: The final image MUST match the template's exact dimensions with complete edge-to-edge coverage and zero whitespace.`;
+REMEMBER: This is an EDIT operation - preserve the template completely and only add the promotional vehicle content to it.`;
 
     console.log("Generated prompt:", prompt);
 
-    // Build the content array for the AI request
+    // Build the content array for the AI request - template image goes first for editing
     const contentArray: any[] = [
       {
         type: "text",
         text: prompt
-      }
-    ];
-
-    // Add dealership template if provided
-    if (dealershipTemplate) {
-      contentArray.push({
+      },
+      {
         type: "image_url",
         image_url: {
           url: dealershipTemplate
         }
-      });
-    }
+      }
+    ];
 
     // Add vehicle images if provided
     vehicleImages.forEach((imageUrl: string) => {
