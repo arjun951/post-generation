@@ -24,6 +24,7 @@ const Index = () => {
   const [numberOfVehicles, setNumberOfVehicles] = useState(1);
   const [vehicleNames, setVehicleNames] = useState<string[]>([""]);
   const [vehicleImages, setVehicleImages] = useState<string[]>([]);
+  const [examplePostImages, setExamplePostImages] = useState<string[]>([]);
   const [dealershipTemplate, setDealershipTemplate] = useState("");
   const [specialFeature, setSpecialFeature] = useState("");
   const [backgroundTheme, setBackgroundTheme] = useState("");
@@ -38,7 +39,7 @@ const Index = () => {
     setVehicleImages(Array(num).fill(""));
   };
 
-  const handleFileUpload = async (file: File, type: 'template' | 'vehicle', index?: number) => {
+  const handleFileUpload = async (file: File, type: 'template' | 'vehicle' | 'example', index?: number) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -48,6 +49,8 @@ const Index = () => {
         const newVehicleImages = [...vehicleImages];
         newVehicleImages[index] = base64String;
         setVehicleImages(newVehicleImages);
+      } else if (type === 'example') {
+        setExamplePostImages(prev => [...prev, base64String]);
       }
     };
     reader.readAsDataURL(file);
@@ -86,6 +89,7 @@ const Index = () => {
           numberOfVehicles,
           vehicleNames: filledVehicleNames,
           vehicleImages: vehicleImages.filter(img => img !== ""),
+          examplePostImages,
           dealershipTemplate,
           specialFeature,
           backgroundTheme,
@@ -264,6 +268,46 @@ const Index = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Example Post Images */}
+              <div className="space-y-2">
+                <Label htmlFor="example-posts">Example Post Images (Optional)</Label>
+                <Input
+                  id="example-posts"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    files.forEach(file => handleFileUpload(file, 'example'));
+                  }}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Upload example posts for style reference. AI will use these to understand the format and characteristics you're looking for, then innovate based on your inputs.
+                </p>
+                {examplePostImages.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">{examplePostImages.length} example(s) uploaded</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExamplePostImages([])}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {examplePostImages.map((img, idx) => (
+                        <div key={idx} className="relative rounded-lg overflow-hidden border border-border">
+                          <img src={img} alt={`Example ${idx + 1}`} className="w-full h-24 object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Custom Keywords */}

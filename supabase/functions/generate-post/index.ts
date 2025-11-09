@@ -15,6 +15,7 @@ serve(async (req) => {
       numberOfVehicles,
       vehicleNames,
       vehicleImages = [],
+      examplePostImages = [],
       dealershipTemplate,
       specialFeature,
       backgroundTheme,
@@ -55,6 +56,10 @@ Add the following promotional content as an overlay to the existing template:
 
     if (vehicleImages.length > 0) {
       prompt += `\n   Use the provided vehicle photos in the composition.`;
+    }
+
+    if (examplePostImages.length > 0) {
+      prompt += `\n\n   STYLE REFERENCE: Example post images are provided for reference. Study their format, layout style, visual characteristics, and composition approach. Use these as inspiration for the expected format and quality, but DO NOT copy them directly. Innovate and create a unique post based on the user's vehicle and theme inputs while maintaining similar professional characteristics.`;
     }
     
     prompt += `\n\n2. CRITICAL RULES:
@@ -101,6 +106,18 @@ Remember, there the dealership template format whether it is landscape or portra
 
     // Add vehicle images if provided
     vehicleImages.forEach((imageUrl: string) => {
+      if (imageUrl) {
+        contentArray.push({
+          type: "image_url",
+          image_url: {
+            url: imageUrl
+          }
+        });
+      }
+    });
+
+    // Add example post images if provided (for style reference)
+    examplePostImages.forEach((imageUrl: string) => {
       if (imageUrl) {
         contentArray.push({
           type: "image_url",
