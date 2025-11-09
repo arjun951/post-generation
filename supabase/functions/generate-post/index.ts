@@ -73,7 +73,13 @@ REMEMBER: This is an EDIT operation - preserve the template completely and only 
    - Final output must be the same pixel dimensions as the template image (no resizing)
    - No letterboxing or pillarboxing; no white/black bars; fill edge-to-edge
    - If the template is portrait, keep portrait layout; if landscape, keep landscape
-   - Return a single flattened composite image only`;
+   - Return a single flattened composite image only
+
+4. CONTENT PLACEMENT (IMPORTANT):
+   - Treat the central white area of the template as the canvas to be FILLED COMPLETELY
+   - Do NOT place a smaller landscape rectangle/photo inside; expand content to touch the inner rounded borders
+   - Use a full-bleed composition with a cover fit (crop as needed) so no white remains visible
+   - Keep the top logos and bottom footer completely visible and unchanged`;
 
     console.log("Generated prompt:", prompt);
 
