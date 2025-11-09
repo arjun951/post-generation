@@ -58,6 +58,7 @@ Add the following promotional content as an overlay to the existing template:
     }
     
     prompt += `\n\n2. CRITICAL RULES:
+   - Use dealershipTemplate as the base image and create the post image on top of it. The post image must align with the dimensions and style of the dealershipTemplate, and the positions of banners, logos, and any other visual elements on the dealershipTemplate must not be changed
    - DO NOT modify, remove, or change any existing template elements
    - The template logo, address, phone, and branding MUST stay exactly as provided
    - Add promotional vehicle content that complements the existing template design
@@ -70,6 +71,7 @@ REMEMBER: This is an EDIT operation - preserve the template completely and only 
     prompt += `
 
 3. OUTPUT FORMAT:
+   - The generated final image must exactly fit the dealershipTemplate with zero border whitespace
    - Final output must be the same pixel dimensions as the template image (no resizing)
    - No letterboxing or pillarboxing; no white/black bars; fill edge-to-edge
    - If the template is portrait, keep portrait layout; if landscape, keep landscape
