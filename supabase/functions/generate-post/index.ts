@@ -66,19 +66,28 @@ Add the following promotional content as an overlay to the existing template:
 
 REMEMBER: This is an EDIT operation - preserve the template completely and only add the promotional vehicle content to it.`;
 
+    // Enforce exact canvas match and no whitespace/letterboxing
+    prompt += `
+
+3. OUTPUT FORMAT:
+   - Final output must be the same pixel dimensions as the template image (no resizing)
+   - No letterboxing or pillarboxing; no white/black bars; fill edge-to-edge
+   - If the template is portrait, keep portrait layout; if landscape, keep landscape
+   - Return a single flattened composite image only`;
+
     console.log("Generated prompt:", prompt);
 
-    // Build the content array for the AI request - template image goes first for editing
+    // Build the content array for the AI request - put template FIRST as the base canvas, then instructions
     const contentArray: any[] = [
-      {
-        type: "text",
-        text: prompt
-      },
       {
         type: "image_url",
         image_url: {
           url: dealershipTemplate
         }
+      },
+      {
+        type: "text",
+        text: prompt
       }
     ];
 
