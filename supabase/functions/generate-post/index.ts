@@ -75,18 +75,22 @@ Remember, there the dealership template format whether it is landscape or portra
     // Enforce exact canvas match and no whitespace/letterboxing
     prompt += `
 
-3. OUTPUT FORMAT:
-   - The generated final image must exactly fit the dealershipTemplate with zero border whitespace
-   - Final output must be the same pixel dimensions as the template image (no resizing)
-   - No letterboxing or pillarboxing; no white/black bars; fill edge-to-edge
-   - If the template is portrait, keep portrait layout; if landscape, keep landscape
+3. OUTPUT FORMAT (CRITICAL - NO WHITESPACE):
+   - ABSOLUTELY NO BORDERS, WHITESPACE, OR PADDING around the image
+   - The generated image MUST fill 100% of the canvas edge-to-edge
+   - Final output must be the EXACT same pixel dimensions as the template image
+   - No letterboxing, pillarboxing, white borders, black borders, or any spacing whatsoever
+   - If the template is portrait, output must be portrait; if landscape, output must be landscape
+   - Content must extend all the way to every edge of the canvas
    - Return a single flattened composite image only
 
-4. CONTENT PLACEMENT (IMPORTANT):
-   - Treat the central white area of the template as the canvas to be FILLED COMPLETELY
-   - Do NOT place a smaller landscape rectangle/photo inside; expand content to touch the inner rounded borders
-   - Use a full-bleed composition with a cover fit (crop as needed) so no white remains visible
-   - Keep the top logos and bottom footer completely visible and unchanged`;
+4. CONTENT PLACEMENT (CRITICAL - FILL COMPLETELY):
+   - The entire canvas must be COMPLETELY FILLED with content
+   - Do NOT leave any white space, gaps, or empty areas anywhere
+   - Extend the background and promotional content to touch all four edges of the canvas
+   - The promotional content should blend seamlessly into the full canvas area
+   - Keep the top logos and bottom footer completely visible and unchanged
+   - Everything between the top and bottom should be filled edge-to-edge with no gaps`;
 
     console.log("Generated prompt:", prompt);
 
