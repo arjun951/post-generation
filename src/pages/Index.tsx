@@ -26,6 +26,8 @@ const Index = () => {
   const [dealershipPhone, setDealershipPhone] = useState("");
   const [numberOfVehicles, setNumberOfVehicles] = useState(1);
   const [vehicleNames, setVehicleNames] = useState<string[]>([""]);
+  const [vehicleImages, setVehicleImages] = useState<string[]>([]);
+  const [dealershipTemplate, setDealershipTemplate] = useState("");
   const [specialFeature, setSpecialFeature] = useState("");
   const [backgroundTheme, setBackgroundTheme] = useState("");
   const [customKeywords, setCustomKeywords] = useState("");
@@ -36,6 +38,22 @@ const Index = () => {
     const num = parseInt(value);
     setNumberOfVehicles(num);
     setVehicleNames(Array(num).fill(""));
+    setVehicleImages(Array(num).fill(""));
+  };
+
+  const handleFileUpload = async (file: File, type: 'template' | 'vehicle', index?: number) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      if (type === 'template') {
+        setDealershipTemplate(base64String);
+      } else if (type === 'vehicle' && index !== undefined) {
+        const newVehicleImages = [...vehicleImages];
+        newVehicleImages[index] = base64String;
+        setVehicleImages(newVehicleImages);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleVehicleNameChange = (index: number, value: string) => {
@@ -68,6 +86,8 @@ const Index = () => {
           dealershipPhone,
           numberOfVehicles,
           vehicleNames: filledVehicleNames,
+          vehicleImages: vehicleImages.filter(img => img !== ""),
+          dealershipTemplate,
           specialFeature,
           backgroundTheme,
           customKeywords,
@@ -149,6 +169,32 @@ const Index = () => {
                     placeholder="Enter contact number"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="template">Dealership Template (Optional)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="template"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'template');
+                      }}
+                      className="cursor-pointer"
+                    />
+                    {dealershipTemplate && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDealershipTemplate("")}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Upload your branded template with logo and contact info</p>
+                </div>
               </div>
 
               {/* Vehicle Details */}
@@ -175,14 +221,44 @@ const Index = () => {
                 </div>
 
                 {vehicleNames.map((name, index) => (
-                  <div key={index} className="space-y-2">
-                    <Label htmlFor={`vehicle-${index}`}>Vehicle {index + 1} Name</Label>
-                    <Input
-                      id={`vehicle-${index}`}
-                      value={name}
-                      onChange={(e) => handleVehicleNameChange(index, e.target.value)}
-                      placeholder="e.g., Honda City, Royal Enfield Classic"
-                    />
+                  <div key={index} className="space-y-3 p-4 border border-border rounded-lg">
+                    <div className="space-y-2">
+                      <Label htmlFor={`vehicle-${index}`}>Vehicle {index + 1} Name</Label>
+                      <Input
+                        id={`vehicle-${index}`}
+                        value={name}
+                        onChange={(e) => handleVehicleNameChange(index, e.target.value)}
+                        placeholder="e.g., Honda City, Royal Enfield Classic"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`vehicle-image-${index}`}>Vehicle {index + 1} Photo (Optional)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id={`vehicle-image-${index}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file, 'vehicle', index);
+                          }}
+                          className="cursor-pointer"
+                        />
+                        {vehicleImages[index] && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newImages = [...vehicleImages];
+                              newImages[index] = "";
+                              setVehicleImages(newImages);
+                            }}
+                          >
+                            Clear
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -13,11 +13,12 @@ serve(async (req) => {
   try {
     const { 
       dealershipName,
-      dealershipLogo,
       dealershipAddress,
       dealershipPhone,
       numberOfVehicles,
       vehicleNames,
+      vehicleImages = [],
+      dealershipTemplate,
       specialFeature,
       backgroundTheme,
       customKeywords
@@ -48,12 +49,50 @@ serve(async (req) => {
     if (customKeywords) {
       prompt += `Additional details: ${customKeywords}. `;
     }
+
+    if (dealershipTemplate) {
+      prompt += `IMPORTANT: Use the provided dealership template image as the base. Overlay the vehicles and promotional content on this template while preserving the logo, branding, and contact information visible in the template. `;
+    }
+
+    if (vehicleImages.length > 0) {
+      prompt += `Use the provided vehicle photos in the composition. `;
+    }
     
     prompt += `The image should be high-quality, professional, and suitable for social media marketing. `;
     prompt += `Style: modern automotive photography, dramatic lighting, professional composition. `;
     prompt += `Make it eye-catching and premium looking.`;
 
     console.log("Generated prompt:", prompt);
+
+    // Build the content array for the AI request
+    const contentArray: any[] = [
+      {
+        type: "text",
+        text: prompt
+      }
+    ];
+
+    // Add dealership template if provided
+    if (dealershipTemplate) {
+      contentArray.push({
+        type: "image_url",
+        image_url: {
+          url: dealershipTemplate
+        }
+      });
+    }
+
+    // Add vehicle images if provided
+    vehicleImages.forEach((imageUrl: string) => {
+      if (imageUrl) {
+        contentArray.push({
+          type: "image_url",
+          image_url: {
+            url: imageUrl
+          }
+        });
+      }
+    });
 
     // Call Lovable AI image generation model
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -67,7 +106,7 @@ serve(async (req) => {
         messages: [
           {
             role: "user",
-            content: prompt
+            content: contentArray
           }
         ],
         modalities: ["image", "text"]
