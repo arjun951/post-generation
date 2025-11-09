@@ -65,7 +65,7 @@ Add the following promotional content as an overlay to the existing template:
    - Ensure the final composition is professional and suitable for social media marketing
    - Match the visual style and quality of the template
 
-REMEMBER: This is an EDIT operation - preserve the template completely and only add the promotional vehicle content to it.`;
+Remember, there the dealership template format whether it is landscape or portrait and generate final image accordingly. You can use your own creativity for post generation.  MUST REQUIRED:  Make sure you are not chaging anything (design, position of logo, address, whether it is landscap, potrail mode) in the final generated image. Always maintain it.`;
 
     // Enforce exact canvas match and no whitespace/letterboxing
     prompt += `
