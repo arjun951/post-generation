@@ -21,9 +21,6 @@ const BACKGROUND_THEMES = [
 ];
 
 const Index = () => {
-  const [dealership, setDealership] = useState("Arjun Motors");
-  const [dealershipAddress, setDealershipAddress] = useState("");
-  const [dealershipPhone, setDealershipPhone] = useState("");
   const [numberOfVehicles, setNumberOfVehicles] = useState(1);
   const [vehicleNames, setVehicleNames] = useState<string[]>([""]);
   const [vehicleImages, setVehicleImages] = useState<string[]>([]);
@@ -64,6 +61,11 @@ const Index = () => {
 
   const handleGenerate = async () => {
     // Validation
+    if (!dealershipTemplate) {
+      toast.error("Please upload a dealership template");
+      return;
+    }
+    
     if (!backgroundTheme) {
       toast.error("Please select a background theme");
       return;
@@ -81,9 +83,6 @@ const Index = () => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-post', {
         body: {
-          dealershipName: dealership,
-          dealershipAddress,
-          dealershipPhone,
           numberOfVehicles,
           vehicleNames: filledVehicleNames,
           vehicleImages: vehicleImages.filter(img => img !== ""),
@@ -136,42 +135,12 @@ const Index = () => {
               <CardDescription>Fill in the details to generate your promotional post</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Dealership Info */}
+              {/* Dealership Template */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Dealership Information</h3>
+                <h3 className="text-lg font-semibold text-foreground">Dealership Template *</h3>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="dealership">Dealership Name</Label>
-                  <Input
-                    id="dealership"
-                    value={dealership}
-                    onChange={(e) => setDealership(e.target.value)}
-                    placeholder="Arjun Motors"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={dealershipAddress}
-                    onChange={(e) => setDealershipAddress(e.target.value)}
-                    placeholder="Enter dealership address"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={dealershipPhone}
-                    onChange={(e) => setDealershipPhone(e.target.value)}
-                    placeholder="Enter contact number"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="template">Dealership Template (Optional)</Label>
+                  <Label htmlFor="template">Upload Template</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="template"
@@ -182,6 +151,7 @@ const Index = () => {
                         if (file) handleFileUpload(file, 'template');
                       }}
                       className="cursor-pointer"
+                      required
                     />
                     {dealershipTemplate && (
                       <Button
@@ -193,7 +163,12 @@ const Index = () => {
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">Upload your branded template with logo and contact info</p>
+                  <p className="text-xs text-muted-foreground">Upload your branded template with logo, address, and contact info. The generated image will match this template size.</p>
+                  {dealershipTemplate && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border">
+                      <img src={dealershipTemplate} alt="Template preview" className="w-full h-auto" />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -352,7 +327,7 @@ const Index = () => {
                       onClick={() => {
                         const link = document.createElement('a');
                         link.href = generatedImage;
-                        link.download = `${dealership}-post.png`;
+                        link.download = `dealership-post.png`;
                         link.click();
                         toast.success("Image downloaded!");
                       }}

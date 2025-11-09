@@ -12,9 +12,6 @@ serve(async (req) => {
 
   try {
     const { 
-      dealershipName,
-      dealershipAddress,
-      dealershipPhone,
       numberOfVehicles,
       vehicleNames,
       vehicleImages = [],
@@ -25,12 +22,15 @@ serve(async (req) => {
     } = await req.json();
 
     console.log("Generating post with params:", {
-      dealershipName,
       numberOfVehicles,
       vehicleNames,
       specialFeature,
       backgroundTheme
     });
+
+    if (!dealershipTemplate) {
+      throw new Error('Dealership template is required');
+    }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -38,29 +38,34 @@ serve(async (req) => {
     }
 
     // Construct the prompt for image generation
-    let prompt = `Create a professional automotive dealership promotional post for ${dealershipName}. `;
-    prompt += `Feature ${numberOfVehicles} vehicle(s): ${vehicleNames.join(', ')}. `;
-    prompt += `Background setting: ${backgroundTheme}. `;
+    let prompt = `CRITICAL: Generate an image that EXACTLY matches the dimensions and aspect ratio of the provided dealership template. The template contains the dealership logo, address, and contact information that MUST remain visible and unchanged.
+
+Create a professional automotive dealership promotional post with the following requirements:
+
+1. EXACT SIZE MATCHING: The generated image MUST be the exact same width and height as the template image provided. Analyze the template dimensions and match them precisely.
+
+2. FULL COVERAGE: Cover the ENTIRE template area with the generated content. There should be NO whitespace, NO margins, and NO empty areas. The composition must extend edge-to-edge.
+
+3. TEMPLATE PRESERVATION: Keep the dealership logo, branding, address, and phone number from the template clearly visible and legible. Position promotional content around these elements.
+
+4. VEHICLE CONTENT: Feature ${numberOfVehicles} vehicle(s): ${vehicleNames.join(', ')}.
+   Background setting: ${backgroundTheme}.`;
     
     if (specialFeature) {
-      prompt += `Highlight this special offer: ${specialFeature}. `;
+      prompt += `\n   Special offer to highlight: ${specialFeature}.`;
     }
     
     if (customKeywords) {
-      prompt += `Additional details: ${customKeywords}. `;
-    }
-
-    if (dealershipTemplate) {
-      prompt += `IMPORTANT: Use the provided dealership template image as the base. Overlay the vehicles and promotional content on this template while preserving the logo, branding, and contact information visible in the template. `;
+      prompt += `\n   Additional requirements: ${customKeywords}.`;
     }
 
     if (vehicleImages.length > 0) {
-      prompt += `Use the provided vehicle photos in the composition. `;
+      prompt += `\n   Use the provided vehicle photos in the composition.`;
     }
     
-    prompt += `The image should be high-quality, professional, and suitable for social media marketing. `;
-    prompt += `Style: modern automotive photography, dramatic lighting, professional composition. `;
-    prompt += `Make it eye-catching and premium looking.`;
+    prompt += `\n\n5. QUALITY: High-quality, professional automotive photography with dramatic lighting and premium composition suitable for social media marketing.
+
+REMEMBER: The final image MUST match the template's exact dimensions with complete edge-to-edge coverage and zero whitespace.`;
 
     console.log("Generated prompt:", prompt);
 
