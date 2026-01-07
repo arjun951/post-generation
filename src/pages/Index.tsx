@@ -25,6 +25,8 @@ const Index = () => {
   const [vehicleNames, setVehicleNames] = useState<string[]>([""]);
   const [vehicleImages, setVehicleImages] = useState<string[]>([]);
   const [examplePostImages, setExamplePostImages] = useState<string[]>([]);
+  const [bannerImages, setBannerImages] = useState<string[]>([]);
+  const [styleImages, setStyleImages] = useState<string[]>([]);
   const [dealershipTemplate, setDealershipTemplate] = useState("");
   const [specialFeature, setSpecialFeature] = useState("");
   const [backgroundTheme, setBackgroundTheme] = useState("");
@@ -41,7 +43,7 @@ const Index = () => {
     setVehicleImages(Array(num).fill(""));
   };
 
-  const handleFileUpload = async (file: File, type: 'template' | 'vehicle' | 'example', index?: number) => {
+  const handleFileUpload = async (file: File, type: 'template' | 'vehicle' | 'example' | 'banner' | 'style', index?: number) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
@@ -53,6 +55,10 @@ const Index = () => {
         setVehicleImages(newVehicleImages);
       } else if (type === 'example') {
         setExamplePostImages(prev => [...prev, base64String]);
+      } else if (type === 'banner') {
+        setBannerImages(prev => [...prev, base64String]);
+      } else if (type === 'style') {
+        setStyleImages(prev => [...prev, base64String]);
       }
     };
     reader.readAsDataURL(file);
@@ -92,6 +98,8 @@ const Index = () => {
           vehicleNames: filledVehicleNames,
           vehicleImages: vehicleImages.filter(img => img !== ""),
           examplePostImages,
+          bannerImages,
+          styleImages,
           dealershipTemplate,
           specialFeature,
           backgroundTheme,
@@ -353,6 +361,92 @@ const Index = () => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Designer Assets Section */}
+              <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
+                <h3 className="text-lg font-semibold text-foreground">Designer Assets (Optional)</h3>
+                <p className="text-xs text-muted-foreground">Upload professional design elements created by experienced designers to enhance the final image.</p>
+                
+                {/* Banner Images */}
+                <div className="space-y-2">
+                  <Label htmlFor="banners">Banner Images</Label>
+                  <Input
+                    id="banners"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => handleFileUpload(file, 'banner'));
+                    }}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload promotional banners, ribbons, or badge designs to incorporate into the post.
+                  </p>
+                  {bannerImages.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">{bannerImages.length} banner(s) uploaded</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setBannerImages([])}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {bannerImages.map((img, idx) => (
+                          <div key={idx} className="relative rounded-lg overflow-hidden border border-border">
+                            <img src={img} alt={`Banner ${idx + 1}`} className="w-full h-16 object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Style Images */}
+                <div className="space-y-2">
+                  <Label htmlFor="styles">Style & Design Elements</Label>
+                  <Input
+                    id="styles"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => handleFileUpload(file, 'style'));
+                    }}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload decorative elements, patterns, textures, or graphic overlays to enhance the design.
+                  </p>
+                  {styleImages.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">{styleImages.length} style element(s) uploaded</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setStyleImages([])}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {styleImages.map((img, idx) => (
+                          <div key={idx} className="relative rounded-lg overflow-hidden border border-border">
+                            <img src={img} alt={`Style ${idx + 1}`} className="w-full h-16 object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Custom Keywords */}

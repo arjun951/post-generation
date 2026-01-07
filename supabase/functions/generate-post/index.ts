@@ -104,6 +104,8 @@ CRITICAL RULES:
       vehicleNames,
       vehicleImages = [],
       examplePostImages = [],
+      bannerImages = [],
+      styleImages = [],
       dealershipTemplate,
       specialFeature,
       backgroundTheme,
@@ -143,6 +145,14 @@ Add the following promotional content as an overlay to the existing template:
 
     if (examplePostImages.length > 0) {
       prompt += `\n\n   STYLE REFERENCE: Example post images are provided for reference. Study their format, layout style, visual characteristics, and composition approach. Use these as inspiration for the expected format and quality, but DO NOT copy them directly. Innovate and create a unique post based on the user's vehicle and theme inputs while maintaining similar professional characteristics.`;
+    }
+
+    if (bannerImages.length > 0) {
+      prompt += `\n\n   BANNER ASSETS: Professional banner/ribbon designs are provided by experienced designers. Incorporate these banners tastefully into the composition - use them to highlight offers, vehicle names, or key selling points. Position them attractively without covering the vehicle or template branding.`;
+    }
+
+    if (styleImages.length > 0) {
+      prompt += `\n\n   STYLE ELEMENTS: Professional design elements (patterns, textures, decorative graphics) are provided by experienced designers. Use these elements to enhance the visual appeal - as background accents, borders, or decorative overlays. Blend them seamlessly with the overall design without overwhelming the main content.`;
     }
     
     prompt += `\n\n2. CRITICAL RULES:
@@ -205,6 +215,30 @@ Remember, there the dealership template format whether it is landscape or portra
 
     // Add example post images if provided (for style reference)
     examplePostImages.forEach((imageUrl: string) => {
+      if (imageUrl) {
+        contentArray.push({
+          type: "image_url",
+          image_url: {
+            url: imageUrl
+          }
+        });
+      }
+    });
+
+    // Add banner images if provided (professional design assets)
+    bannerImages.forEach((imageUrl: string) => {
+      if (imageUrl) {
+        contentArray.push({
+          type: "image_url",
+          image_url: {
+            url: imageUrl
+          }
+        });
+      }
+    });
+
+    // Add style images if provided (decorative design elements)
+    styleImages.forEach((imageUrl: string) => {
       if (imageUrl) {
         contentArray.push({
           type: "image_url",
