@@ -11,6 +11,94 @@ serve(async (req) => {
   }
 
   try {
+    const requestBody = await req.json();
+    const { mode = 'generate' } = requestBody;
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
+    // Handle refinement mode
+    if (mode === 'refine') {
+      const { currentImage, refinementPrompt, dealershipTemplate } = requestBody;
+      
+      if (!currentImage) {
+        throw new Error('Current image is required for refinement');
+      }
+      if (!refinementPrompt) {
+        throw new Error('Refinement prompt is required');
+      }
+
+      console.log("Refining image with instructions:", refinementPrompt);
+
+      const refinePrompt = `Edit this image according to the following instructions: ${refinementPrompt}
+
+CRITICAL RULES:
+- Apply ONLY the changes requested in the instructions above
+- Maintain the overall composition, layout, and professional quality
+- Keep the dealership branding (logos, addresses, contact info) intact and unchanged
+- The output must be the EXACT same dimensions as the input image
+- NO borders, whitespace, or padding - fill edge-to-edge
+- Ensure the result remains suitable for social media marketing`;
+
+      const contentArray: any[] = [
+        {
+          type: "image_url",
+          image_url: { url: currentImage }
+        },
+        {
+          type: "text",
+          text: refinePrompt
+        }
+      ];
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image-preview",
+          messages: [{ role: "user", content: contentArray }],
+          modalities: ["image", "text"]
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const errorText = await response.text();
+        console.error("AI gateway error:", response.status, errorText);
+        throw new Error(`AI gateway error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      
+      if (!generatedImage) {
+        console.error("No image in refinement response:", data);
+        throw new Error("No refined image generated");
+      }
+
+      return new Response(
+        JSON.stringify({ imageUrl: generatedImage }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
+    // Original generation mode
     const { 
       numberOfVehicles,
       vehicleNames,
@@ -20,7 +108,7 @@ serve(async (req) => {
       specialFeature,
       backgroundTheme,
       customKeywords
-    } = await req.json();
+    } = requestBody;
 
     console.log("Generating post with params:", {
       numberOfVehicles,
@@ -31,11 +119,6 @@ serve(async (req) => {
 
     if (!dealershipTemplate) {
       throw new Error('Dealership template is required');
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     // Construct the prompt for image editing - we'll overlay promotional content on the template

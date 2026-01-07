@@ -31,6 +31,8 @@ const Index = () => {
   const [customKeywords, setCustomKeywords] = useState("");
   const [generatedImage, setGeneratedImage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [refinementPrompt, setRefinementPrompt] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
 
   const handleNumberOfVehiclesChange = (value: string) => {
     const num = parseInt(value);
@@ -113,6 +115,49 @@ const Index = () => {
       toast.error("Failed to generate post. Please try again.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRefine = async () => {
+    if (!refinementPrompt.trim()) {
+      toast.error("Please enter refinement instructions");
+      return;
+    }
+
+    if (!generatedImage) {
+      toast.error("No image to refine");
+      return;
+    }
+
+    setIsRefining(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-post', {
+        body: {
+          mode: 'refine',
+          currentImage: generatedImage,
+          refinementPrompt: refinementPrompt.trim(),
+          dealershipTemplate,
+        }
+      });
+
+      if (error) {
+        console.error("Refinement error:", error);
+        throw error;
+      }
+
+      if (data?.imageUrl) {
+        setGeneratedImage(data.imageUrl);
+        setRefinementPrompt("");
+        toast.success("Image refined successfully!");
+      } else {
+        throw new Error("No image URL in response");
+      }
+    } catch (error) {
+      console.error("Error refining image:", error);
+      toast.error("Failed to refine image. Please try again.");
+    } finally {
+      setIsRefining(false);
     }
   };
 
@@ -364,6 +409,39 @@ const Index = () => {
                       className="w-full h-auto"
                     />
                   </div>
+                  {/* Refinement Section */}
+                  <div className="space-y-2 p-4 bg-muted/50 rounded-lg border border-border">
+                    <Label htmlFor="refinement" className="text-sm font-medium">Refine Image</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="refinement"
+                        value={refinementPrompt}
+                        onChange={(e) => setRefinementPrompt(e.target.value)}
+                        placeholder="e.g., Make the car bigger, add more lighting, change text color..."
+                        disabled={isRefining}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !isRefining) {
+                            handleRefine();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={handleRefine}
+                        disabled={isRefining || !refinementPrompt.trim()}
+                        size="default"
+                      >
+                        {isRefining ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Refine"
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Enter instructions to modify the generated image
+                    </p>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -383,6 +461,7 @@ const Index = () => {
                       className="flex-1"
                       onClick={() => {
                         setGeneratedImage("");
+                        setRefinementPrompt("");
                         toast.info("Ready for a new post!");
                       }}
                     >
